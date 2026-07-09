@@ -2,6 +2,7 @@
 
 #include <LingmoIPC/DBusConnection.h>
 #include <QDBusConnection>
+#include <optional>
 
 namespace Lingmo {
 
@@ -9,7 +10,7 @@ class DBusConnectionPrivate
 {
 public:
     DBusConnection::BusType busType;
-    QDBusConnection conn;
+    std::optional<QDBusConnection> conn;
     bool connected = false;
 };
 

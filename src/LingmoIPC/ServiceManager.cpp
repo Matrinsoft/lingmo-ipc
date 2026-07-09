@@ -2,7 +2,7 @@
 
 #include <QCoreApplication>
 #include <QProcessEnvironment>
-#include <QTcpSocket>
+#include <QLocalSocket>
 
 namespace Lingmo {
 
@@ -24,8 +24,9 @@ static bool sdNotify(const char *state)
     }
 
     // Unix socket
-    QTcpSocket socket;
-    if (!socket.connectToServer(socketPath))
+    QLocalSocket socket;
+    socket.connectToServer(socketPath);
+    if (socket.state() != QLocalSocket::ConnectedState)
         return false;
 
     const QByteArray msg = QByteArray::fromRawData(state, static_cast<int>(strlen(state)));
