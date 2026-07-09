@@ -1,0 +1,27 @@
+Source: lingmo-ipc
+Section: libs
+Priority: optional
+Maintainer: Lingmo OS Team <team@lingmo.org>
+Build-Depends: debhelper-compat (= 13),
+               cmake (>= 3.21),
+               qt6-base-dev (>= 6.5),
+               qt6-base-private-dev (>= 6.5)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+
+Package: liblingmoipc1
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Lingmo Desktop - IPC and D-Bus integration (shared library)
+ Lingmo IPC provides D-Bus connection management, service registration,
+ and systemd integration for Lingmo Desktop components.
+
+Package: liblingmoipc-dev
+Architecture: any
+Section: libdevel
+Depends: liblingmoipc1 (= ${binary:Version}),
+         qt6-base-dev (>= 6.5),
+         ${misc:Depends}
+Description: Lingmo Desktop - IPC and D-Bus integration (development files)
+ This package contains the development headers and CMake integration
+ for Lingmo IPC.

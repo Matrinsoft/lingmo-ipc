@@ -1,0 +1,3 @@
+usr/include/LingmoIPC/
+usr/lib/*/libLingmoIPC.so
+usr/lib/*/cmake/LingmoIPC/

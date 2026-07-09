@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Qt6 COMPONENTS Core DBus)
+
+include("${CMAKE_CURRENT_LIST_DIR}/LingmoIPCTargets.cmake")
+
+check_required_components(LingmoIPC)
