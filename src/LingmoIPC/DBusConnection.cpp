@@ -20,13 +20,13 @@ DBusConnection::DBusConnection(BusType type, QObject *parent)
         d->conn = QDBusConnection::systemBus();
     }
 
-    d->connected = d->conn.isConnected();
+    d->connected = d->conn->isConnected();
 
     if (!d->connected) {
         const char *busName = (type == SessionBus) ? "session" : "system";
         qWarning("LingmoIPC: Failed to connect to %s bus: %s",
                  busName,
-                 qPrintable(d->conn.lastError().message()));
+                 qPrintable(d->conn->lastError().message()));
     }
 }
 

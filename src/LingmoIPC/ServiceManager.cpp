@@ -2,13 +2,17 @@
 
 #include <QCoreApplication>
 #include <QProcessEnvironment>
-#include <QLocalSocket>
+
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+#include <cstring>
 
 namespace Lingmo {
 
 static ServiceManager *s_instance = nullptr;
 
-// sd_notify implementation via direct socket connection
+// sd_notify via raw Unix socket (no Qt dependency)
 static bool sdNotify(const char *state)
 {
     const QString socketPath = QProcessEnvironment::systemEnvironment()
@@ -17,23 +21,34 @@ static bool sdNotify(const char *state)
     if (socketPath.isEmpty())
         return false;
 
-    // Abstract socket
-    if (socketPath.startsWith(QLatin1Char('@'))) {
-        // Abstract socket not supported via Qt, fall back
-        return false;
+    const QByteArray pathUtf8 = socketPath.toUtf8();
+    const char *path = pathUtf8.constData();
+
+    struct sockaddr_un addr{};
+    addr.sun_family = AF_UNIX;
+
+    bool isAbstract = false;
+    if (path[0] == '@') {
+        // Abstract socket: skip '@', use sun_path[0] = '\0'
+        isAbstract = true;
+        addr.sun_path[0] = '\0';
+        strncpy(addr.sun_path + 1, path + 1, sizeof(addr.sun_path) - 2);
+    } else {
+        strncpy(addr.sun_path, path, sizeof(addr.sun_path) - 1);
     }
 
-    // Unix socket
-    QLocalSocket socket;
-    socket.connectToServer(socketPath);
-    if (socket.state() != QLocalSocket::ConnectedState)
-        return false;
+    const socklen_t addrLen = static_cast<socklen_t>(
+        offsetof(struct sockaddr_un, sun_path)
+        + (isAbstract ? strlen(path) : strlen(addr.sun_path))
+        + (isAbstract ? 1 : 0));
 
-    const QByteArray msg = QByteArray::fromRawData(state, static_cast<int>(strlen(state)));
-    socket.write(msg);
-    socket.flush();
-    socket.disconnectFromServer();
-    return true;
+    const int fd = socket(AF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    if (fd < 0) return false;
+
+    const bool ok = (sendto(fd, state, strlen(state), 0,
+                            reinterpret_cast<struct sockaddr *>(&addr), addrLen) > 0);
+    close(fd);
+    return ok;
 }
 
 ServiceManager::ServiceManager(QObject *parent)
