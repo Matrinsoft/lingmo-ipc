@@ -47,7 +47,7 @@ private Q_SLOTS:
                                 QStringLiteral("/org/lingmo/test"),
                                 QStringLiteral("org.lingmo.test.Interface"),
                                 QStringLiteral("TestMethod"));
-        QVERIFY(!msg.type() == QDBusMessage::ReplyMessage);
+        QVERIFY(msg.type() != QDBusMessage::ReplyMessage);
     }
 };
 
